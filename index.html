@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login Page</title>
+
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    /* ---------------------------- Reset & Base ---------------------------- */
+    :root{
+      --bg-1:#0b0510;
+      --bg-2:#130724;
+      --neon-1:#9b59ff; /* purple */
+      --neon-2:#ff45a1; /* pink accent */
+      --glow: 0 6px 30px rgba(155,89,255,0.18), inset 0 1px 0 rgba(255,255,255,0.02);
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Poppins",system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(155,89,255,0.12), transparent 6%),
+                  radial-gradient(900px 420px at 85% 85%, rgba(255,69,161,0.10), transparent 8%),
+                  linear-gradient(160deg,var(--bg-1),var(--bg-2));
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    /* ---------------------------- Particle canvas beneath everything ---------------------------- */
+    canvas#bg {
+      position:fixed;
+      inset:0;
+      z-index:0;
+    }
+
+    /* ---------------------------- Center container & aura ---------------------------- */
+    .stage{
+      width:100%;
+      max-width:920px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:32px;
+      z-index:2;
+      position:relative;
+      padding:24px;
+    }
+
+    /* subtle neon floating orbs (decorative) */
+    .aura {
+      position:absolute;
+      width:560px;
+      height:420px;
+      border-radius:48%;
+      filter:blur(60px) saturate(140%);
+      background: radial-gradient(closest-side, rgba(155,89,255,0.14), transparent 40%),
+                  radial-gradient(closest-side, rgba(255,69,161,0.08), transparent 30%);
+      transform: translateY(-18%);
+      z-index:1;
+      pointer-events:none;
+      opacity:0.9;
+    }
+
+    /* ---------------------------- Flip card (login / signup) ---------------------------- */
+    .auth-wrap{
+      width:420px;
+      perspective:1200px;
+    }
+
+    .card{
+      width:100%;
+      border-radius:18px;
+      transform-style:preserve-3d;
+      transition:transform 900ms cubic-bezier(.2,.9,.25,1);
+      position:relative;
+      z-index:3;
+    }
+
+    .card.flipped{ transform: rotateY(180deg); }
+
+    .panel{
+      position:relative;
+      width:100%;
+      min-height:520px;
+      padding:34px;
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px) saturate(130%);
+      box-shadow: var(--glow);
+      color:#fff;
+      backface-visibility:hidden;
+      transform:translateZ(0);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:12px;
+      overflow:hidden;
+    }
+
+    /* neon edge stroke */
+    .panel::before{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius:20px;
+      padding:1px;
+      background:linear-gradient(90deg, rgba(155,89,255,0.35), rgba(255,69,161,0.18), rgba(56,189,248,0.08));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events:none;
+      filter:blur(10px) contrast(1.1);
+      z-index:0;
+    }
+
+    /* back face rotated */
+    .panel.back{ transform:rotateY(180deg) }
+
+    /* header */
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:8px;
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--neon-1),var(--neon-2));
+      color:#08020b;font-weight:700;font-size:20px;
+      box-shadow:0 6px 30px rgba(155,89,255,0.22);
+    }
+    .title{
+      text-align:center;
+      font-size:20px;
+      letter-spacing:0.6px;
+      font-weight:600;
+      background:linear-gradient(90deg,var(--neon-1),var(--neon-2));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+
+    .subtitle{ font-size:13px; color:rgba(255,255,255,0.68); text-align:center; margin-bottom:6px }
+
+    /* form layout */
+    form{ width:100%; display:flex; flex-direction:column; gap:12px; z-index:2; position:relative; }
+
+    .inputs{
+      display:flex; flex-direction:column; gap:12px; margin-top:8px;
+      transition:all 280ms ease;
+    }
+
+    .field{
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"]{
+      width:100%;
+      padding:14px 46px 14px 14px;
+      font-size:14px;
+      border-radius:10px;
+      color:#fff;
+      background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.04);
+      outline:none;
+      transition: box-shadow .25s, transform .18s, background .25s;
+    }
+
+    /* ensure floating label approach works on empty inputs */
+    input::placeholder{ color:transparent } /* keep placeholder hidden; we use label */
+
+    label.floating{
+      position:absolute;
+      left:14px; top:50%; transform:translateY(-50%);
+      font-size:13px;
+      color:rgba(255,255,255,0.6);
+      pointer-events:none;
+      transition: transform .18s ease, top .18s ease, font-size .18s ease, color .18s ease;
+      background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.1));
+      padding:0 6px; border-radius:6px;
+    }
+
+    /* when focused or has text */
+    input:focus, input:not(:placeholder-shown){
+      box-shadow:0 6px 28px rgba(155,89,255,0.10);
+    }
+    input:focus + label.floating,
+    input:not(:placeholder-shown) + label.floating{
+      transform:none;
+      top:-10px; font-size:11px; color:var(--neon-1);
+      box-shadow: none;
+    }
+
+    /* icons on right */
+    .icon-right{
+      position:absolute;
+      right:10px; top:50%; transform:translateY(-50%);
+      color:rgba(255,255,255,0.85);
+      font-size:15px;
+      cursor:pointer;
+      display:flex; align-items:center; gap:8px;
+      z-index:6;
+    }
+
+    /* password eye size & clickable */
+    .icon-right .fa-eye{ font-size:16px; padding:6px; border-radius:8px; transition:all .18s }
+    .icon-right .fa-eye:hover{ transform:scale(1.06); color:var(--neon-2) }
+
+    /* remember row */
+    .row{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-top:6px;
+    }
+    .check{
+      display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.75); font-size:13px;
+    }
+    .check input{ width:16px; height:16px; accent-color:var(--neon-1); border-radius:4px }
+
+    .cta{
+      margin-top:6px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+
+    .btn-primary{
+      width:100%;
+      padding:13px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      background: linear-gradient(90deg,var(--neon-1),var(--neon-2));
+      color:#08020b;
+      font-weight:700;
+      letter-spacing:0.4px;
+      box-shadow:0 10px 40px rgba(155,89,255,0.18);
+      transform:translateY(0);
+      transition: transform .18s ease, box-shadow .2s ease;
+    }
+    .btn-primary:hover{ transform:translateY(-4px); box-shadow:0 20px 60px rgba(155,89,255,0.24) }
+
+    .link{
+      text-decoration:none; color:var(--neon-2); font-weight:600; font-size:13px;
+    }
+
+    /* small footer text */
+    .small{
+      text-align:center; color:rgba(255,255,255,0.55); font-size:12px; margin-top:6px;
+    }
+
+    /* responsiveness */
+    @media (max-width:520px){
+      .auth-wrap{ padding:14px }
+      .panel{ padding:22px }
+      .logo{ width:48px; height:48px; font-size:18px }
+    }
+  </style>
+</head>
+<body>
+  <!-- Particle canvas (behind) -->
+  <canvas id="bg"></canvas>
+
+  <div class="stage">
+    <div class="aura" aria-hidden="true"></div>
+
+    <div class="auth-wrap" style="z-index:3">
+      <div class="card" id="card">
+        <!-- Login Panel -->
+        <section class="panel front">
+          <div class="brand">
+            <div class="logo">sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ</div>
+          </div>
+          <div class="title">Welcome back</div>
+          <div class="subtitle">Sign in to continue to your dashboard</div>
+
+          <form id="loginForm" autocomplete="on" novalidate>
+            <div class="inputs">
+              <div class="field">
+                <input id="loginEmail" type="email" placeholder=" " required />
+                <label class="floating" for="loginEmail">Email</label>
+                <div class="icon-right" aria-hidden="true"><i class="fa-solid fa-envelope"></i></div>
+              </div>
+
+              <div class="field">
+                <input id="loginPassword" type="password" placeholder=" " required />
+                <label class="floating" for="loginPassword">Password</label>
+                <div class="icon-right">
+                  <i id="loginToggle" class="fa-solid fa-eye"></i>
+                </div>
+              </div>
+
+              <div class="row">
+                <label class="check"><input type="checkbox" id="remember" /> Remember me</label>
+                <a href="#" class="link" id="showSignupFromLogin">Create account</a>
+              </div>
+            </div>
+
+            <div class="cta">
+              <button class="btn-primary" type="submit"><i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:8px"></i> Sign in</button>
+              <div class="small">By continuing you agree to the <a class="link" href="#">Terms</a></div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Signup Panel -->
+        <section class="panel back">
+          <div class="brand">
+            <div class="logo">sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ</div>
+          </div>
+          <div class="title">Create your account</div>
+          <div class="subtitle">Quick, secure signup — join the future</div>
+
+          <form id="signupForm" autocomplete="on" novalidate>
+            <div class="inputs">
+              <div class="field">
+                <input id="signupUser" type="text" placeholder=" " required />
+                <label class="floating" for="signupUser">Username</label>
+                <div class="icon-right"><i class="fa-solid fa-user"></i></div>
+              </div>
+
+              <div class="field">
+                <input id="signupEmail" type="email" placeholder=" " required />
+                <label class="floating" for="signupEmail">Email</label>
+                <div class="icon-right"><i class="fa-solid fa-envelope"></i></div>
+              </div>
+
+              <div class="field">
+                <input id="signupPassword" type="password" placeholder=" " required />
+                <label class="floating" for="signupPassword">Password</label>
+                <div class="icon-right"><i id="signupToggle" class="fa-solid fa-eye"></i></div>
+              </div>
+
+              <div class="row" style="margin-top:4px">
+                <div style="font-size:13px;color:rgba(255,255,255,0.75)">Already a member? <a href="#" class="link" id="showLoginFromSignup">Sign in</a></div>
+              </div>
+            </div>
+
+            <div class="cta">
+              <button class="btn-primary" type="submit"><i class="fa-solid fa-user-check" style="margin-right:8px"></i> Create account</button>
+              <div class="small">We’ll never share your information. <a class="link" href="#">Privacy</a></div>
+            </div>
+          </form>
+        </section>
+
+        <footer style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: #fff; font-size: 0.8rem; text-shadow: 0 0 5px #ff00ff;">
+  <!-- Neon divider line -->
+  <span style="display: block; width: 60%; height: 1px; margin: 0 auto 8px auto; background: linear-gradient(90deg, transparent, #ff00ff, transparent); box-shadow: 0 0 8px #ff00ff;"></span>
+
+  <!-- Footer text -->
+  <span style="transition: 0.3s;">© 𝟤𝟢𝟤𝟧 sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ ᴧʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ</span>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------------------------- Flip logic & toggles ---------------------------- */
+    const card = document.getElementById('card');
+    const showSignupFromLogin = document.getElementById('showSignupFromLogin');
+    const showLoginFromSignup = document.getElementById('showLoginFromSignup');
+
+    showSignupFromLogin.addEventListener('click', (e) => { e.preventDefault(); card.classList.add('flipped'); });
+    showLoginFromSignup.addEventListener('click', (e) => { e.preventDefault(); card.classList.remove('flipped'); });
+
+    // Password toggles (works reliably)
+    const loginToggle = document.getElementById('loginToggle');
+    const loginPassword = document.getElementById('loginPassword');
+    loginToggle.addEventListener('click', () => {
+      const t = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+      loginPassword.setAttribute('type', t);
+      loginToggle.classList.toggle('fa-eye-slash');
+    });
+
+    const signupToggle = document.getElementById('signupToggle');
+    const signupPassword = document.getElementById('signupPassword');
+    signupToggle.addEventListener('click', () => {
+      const t = signupPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+      signupPassword.setAttribute('type', t);
+      signupToggle.classList.toggle('fa-eye-slash');
+    });
+
+    /* ---------------------------- Nice small validation + demo submit ---------------------------- */
+    document.getElementById('loginForm').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      // lightweight validation
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = loginPassword.value.trim();
+      if (!email || !pass) {
+        flashError('Please fill email & password');
+        return;
+      }
+      // demo success microinteraction
+      card.style.transition = 'transform .45s';
+      card.style.transform += ' translateY(-8px)';
+      setTimeout(()=>{ card.style.transform = card.style.transform.replace(' translateY(-8px)',''); }, 300);
+      alert('✅ Login (demo) — connect backend later');
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      const user = document.getElementById('signupUser').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const pass = signupPassword.value.trim();
+      if (!user || !email || !pass) { flashError('Please complete all fields'); return; }
+      alert('🎉 Signup (demo) — account created (client-only demo)');
+      card.classList.remove('flipped');
+    });
+
+    function flashError(msg){
+      // small unobtrusive error (native alert replaced with quick UI flash)
+      const old = document.querySelector('.small.temp');
+      if (old) old.remove();
+      const el = document.createElement('div');
+      el.className = 'small temp';
+      el.style.color = '#ff9cc9';
+      el.style.textAlign = 'center';
+      el.style.marginTop = '8px';
+      el.textContent = msg;
+      document.querySelector('.panel.front form .cta').prepend(el);
+      setTimeout(()=>el.remove(),2200);
+    }
+
+    /* ---------------------------- Particle network (neon purple) ---------------------------- */
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let dpi = window.devicePixelRatio || 1;
+
+    function resize(){
+      dpi = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(innerWidth * dpi);
+      canvas.height = Math.floor(innerHeight * dpi);
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      ctx.setTransform(dpi,0,0,dpi,0,0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // particle settings
+    const particles = [];
+    const PARTICLE_COUNT = Math.floor((innerWidth * innerHeight) / 70000); // density adapts
+    const MAX_LINK_DIST = 160;
+
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+
+    function initParticles(){
+      particles.length = 0;
+      for(let i=0;i<PARTICLE_COUNT;i++){
+        particles.push({
+          x: rand(0, innerWidth),
+          y: rand(0, innerHeight),
+          r: rand(0.8,2.4),
+          vx: rand(-0.25,0.25),
+          vy: rand(-0.25,0.25),
+          hue: rand(260,290) // purple-ish hue
+        });
+      }
+    }
+    initParticles();
+
+    // mouse influence
+    const mouse = {x: null, y: null, radius: 90};
+    window.addEventListener('mousemove', (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseout', ()=>{ mouse.x = null; mouse.y = null; });
+
+    function updateParticles(){
+      for(let p of particles){
+        // move
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // bounce edges
+        if(p.x < 0){ p.x = 0; p.vx *= -1 }
+        if(p.x > innerWidth){ p.x = innerWidth; p.vx *= -1 }
+        if(p.y < 0){ p.y = 0; p.vy *= -1 }
+        if(p.y > innerHeight){ p.y = innerHeight; p.vy *= -1 }
+
+        // slight attraction/repel to mouse
+        if(mouse.x && mouse.y){
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist < mouse.radius){
+            // repel with easing
+            const angle = Math.atan2(dy,dx);
+            const force = (mouse.radius - dist) / mouse.radius * 0.6;
+            p.vx += Math.cos(angle) * force;
+            p.vy += Math.sin(angle) * force;
+          } else {
+            // gentle slow down to original velocity
+            p.vx *= 0.995; p.vy *= 0.995;
+          }
+        }
+        // subtle velocity clamp
+        p.vx = Math.max(Math.min(p.vx,0.9),-0.9);
+        p.vy = Math.max(Math.min(p.vy,0.9),-0.9);
+      }
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+
+      // draw links
+      for(let i=0;i<particles.length;i++){
+        const a = particles[i];
+        for(let j=i+1;j<particles.length;j++){
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist < MAX_LINK_DIST){
+            const alpha = 0.12 * (1 - dist / MAX_LINK_DIST);
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(155,89,255,${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // draw particles
+      for(let p of particles){
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*4);
+        g.addColorStop(0, `rgba(155,89,255,0.95)`);
+        g.addColorStop(0.5, `rgba(155,89,255,0.28)`);
+        g.addColorStop(1, `rgba(155,89,255,0)`);
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(p.x, p.y, p.r*1.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function tick(){
+      updateParticles();
+      draw();
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    // gently re-init particles on big resize
+    let resizeTimer;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(()=>{ initParticles(); }, 220);
+    });
+  </script>
+</body>
+    </html>
