@@ -265,6 +265,61 @@
       .panel{ padding:22px }
       .logo{ width:48px; height:48px; font-size:18px }
     }
+    .cyber-footer {
+  text-align: center;
+  color: #fff;
+  font-size: 0.85rem;
+  text-shadow: 0 0 6px #ff00ff;
+  margin-top: 20px;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.cyber-footer .divider {
+  width: 60%;
+  height: 1px;
+  margin: 0 auto 10px auto;
+  background: linear-gradient(90deg, transparent, #ff00ff, transparent);
+  box-shadow: 0 0 10px #ff00ff;
+}
+
+/* Mobile view adjustments */
+@media (max-width: 768px) {
+  .cyber-footer {
+    font-size: 0.75rem;
+    padding: 8px 15px;
+  }
+
+  .cyber-footer .divider {
+    width: 80%;
+  }
+}
+
+/* Optional: Hover glow effect */
+.cyber-footer span:hover {
+  text-shadow: 0 0 15px #ff00ff, 0 0 25px #cc00ff;
+  transition: 0.3s ease-in-out;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
   </style>
 </head>
 <body>
@@ -353,13 +408,10 @@
           </form>
         </section>
 
-        <!-- Footer (place this directly below your login/signup card) -->
-<footer style="text-align: center; color: #fff; font-size: 0.85rem; text-shadow: 0 0 5px #ff00ff; margin-top: 20px;">
-  <!-- Neon divider line -->
-  <div style="width: 60%; height: 1px; margin: 0 auto 8px auto; background: linear-gradient(90deg, transparent, #ff00ff, transparent); box-shadow: 0 0 8px #ff00ff;"></div>
-
-  <!-- Footer text -->
-  <span style="transition: 0.3s;">© 𝟤𝟢𝟤𝟧 sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ ᴧʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ</span>
+        <!-- Footer -->
+<footer class="cyber-footer">
+  <div class="divider"></div>
+  <span>© 𝟤𝟢𝟤𝟧 sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ ᴧʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ</span>
 </footer>
 
       </div>
