@@ -266,13 +266,16 @@
       .logo{ width:48px; height:48px; font-size:18px }
     }
     .cyber-footer {
+  te.cyber-footer {
   text-align: center;
   color: #fff;
   font-size: 0.85rem;
   text-shadow: 0 0 6px #ff00ff;
-  margin-top: 20px;
-  padding: 10px 20px;
+  margin-top: 24px;
+  padding: 12px 20px;
   width: 100%;
+  max-width: 420px; /* match card width */
+  align-self: center;
 }
 
 .cyber-footer .divider {
@@ -283,24 +286,23 @@
   box-shadow: 0 0 10px #ff00ff;
 }
 
+.cyber-footer span:hover {
+  text-shadow: 0 0 15px #ff00ff, 0 0 25px #cc00ff;
+  transition: 0.3s ease-in-out;
+}
+
 /* Mobile view adjustments */
-@media (max-width: 768px) {
+@media (max-width: 520px) {
   .cyber-footer {
     font-size: 0.75rem;
-    padding: 8px 15px;
+    margin-top: 16px;
+    padding: 10px 15px;
   }
 
   .cyber-footer .divider {
     width: 80%;
   }
 }
-
-/* Optional: Hover glow effect */
-.cyber-footer span:hover {
-  text-shadow: 0 0 15px #ff00ff, 0 0 25px #cc00ff;
-  transition: 0.3s ease-in-out;
-}
-
 
 
 
@@ -407,13 +409,13 @@
             </div>
           </form>
         </section>
-
-        <!-- Footer -->
-<footer class="cyber-footer">
-  <div class="divider"></div>
-  <span>© 𝟤𝟢𝟤𝟧 sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ ᴧʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ</span>
-</footer>
-
+          </div>
+        <!-- Footer fixed below the card -->
+  <footer class="cyber-footer">
+    <div class="divider"></div>
+    <span>© 𝟤𝟢𝟤𝟧 sᴧɴᴅᴇᴇᴘ sʜᴧʀᴍᴧ ᴧʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ</span>
+  </footer>
+      </div>
       </div>
     </div>
   </div>
